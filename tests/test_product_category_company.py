@@ -85,3 +85,74 @@ class TestProductCategoryCompany(TransactionCase):
             "parent_id": self.category_a.id,
         })
         self.assertEqual(category.parent_id.id, self.category_a.id)
+
+    def test_manual_company_assignment_changes_visibility(self):
+        categories = self._categories(self.company_a, self.company_b)
+        categories.browse(self.category_a.id).write({"company_id": self.company_b.id})
+        self.assertFalse(categories.search([("id", "=", self.category_a.id)]))
+        categories_b = self._categories(self.company_b, self.company_a)
+        self.assertEqual(
+            categories_b.search([("id", "=", self.category_a.id)]).ids,
+            self.category_a.ids,
+        )
+
+    def test_hierarchy_can_be_reassigned_in_one_batch(self):
+        categories = self._categories(self.company_a, self.company_b)
+        child = categories.create({"name": "Batch child", "parent_id": self.category_a.id})
+        hierarchy = categories.browse([self.category_a.id, child.id])
+        hierarchy.write({"company_id": self.company_b.id})
+        categories_b = self._categories(self.company_b, self.company_a)
+        moved = categories_b.search([("id", "in", hierarchy.ids)])
+        self.assertEqual(set(moved.ids), set(hierarchy.ids))
+        self.assertEqual(moved.mapped("company_id"), self.company_b)
+
+    def test_product_default_keeps_category_of_active_company(self):
+        env = self._categories(self.company_a, self.company_b).env
+        for model_name in ("product.template", "product.product"):
+            with self.subTest(model=model_name):
+                defaults = env[model_name].with_context(
+                    default_categ_id=self.category_a.id,
+                ).default_get(["categ_id"])
+                self.assertEqual(defaults["categ_id"], self.category_a.id)
+
+    def test_product_default_clears_category_after_company_switch(self):
+        env = self._categories(self.company_b, self.company_a).env
+        for model_name in ("product.template", "product.product"):
+            with self.subTest(model=model_name):
+                defaults = env[model_name].with_context(
+                    default_categ_id=self.category_a.id,
+                ).default_get(["categ_id"])
+                self.assertFalse(defaults.get("categ_id"))
+
+    def test_product_default_can_stay_empty(self):
+        env = self._categories(self.company_a, self.company_b).env
+        for model_name in ("product.template", "product.product"):
+            with self.subTest(model=model_name):
+                defaults = env[model_name].with_context(default_categ_id=False).default_get(["categ_id"])
+                self.assertFalse(defaults.get("categ_id"))
+
+    def test_group_expansion_respects_active_company(self):
+        for company, other_company, visible, hidden in (
+            (self.company_a, self.company_b, self.category_a, self.category_b),
+            (self.company_b, self.company_a, self.category_b, self.category_a),
+        ):
+            categories = self._categories(company, other_company)
+            products = categories.env["product.template"].with_context(group_expand=True)
+            expanded = products._read_group_categ_id(categories.browse(), [])
+            self.assertIn(visible.id, expanded.ids)
+            self.assertNotIn(hidden.id, expanded.ids)
+
+    def test_group_expansion_rejects_foreign_context_default(self):
+        categories = self._categories(self.company_a, self.company_b)
+        products = categories.env["product.template"].with_context(default_categ_id=self.category_b.id)
+        self.assertFalse(products._read_group_categ_id(categories.browse(), []))
+
+    def test_category_assignment_preserves_existing_products(self):
+        product = self.env["product.template"].sudo().create({
+            "name": "Product assigned by the client",
+            "company_id": self.company_a.id,
+            "categ_id": self.category_a.id,
+        })
+        self.category_a.sudo().write({"company_id": self.company_b.id})
+        self.assertEqual(product.company_id, self.company_a)
+        self.assertEqual(product.categ_id, self.category_a)

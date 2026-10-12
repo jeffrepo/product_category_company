@@ -1,0 +1,33 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#   * product_category_company
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: product_category_company
+#: model:ir.model.fields,field_description:product_category_company.field_product_category__company_id
+msgid "Company"
+msgstr "Compañía"
+
+#. module: product_category_company
+#: model:ir.model.fields,help:product_category_company.field_product_category__company_id
+msgid "Only users working in this company can access this category."
+msgstr "Solo los usuarios que trabajen en esta compañía pueden acceder a esta categoría."
+
+#. module: product_category_company
+#. odoo-python
+#: code:addons/product_category_company/models/product_category.py:0
+msgid "A category and its parent must belong to the same company."
+msgstr "Una categoría y su categoría padre deben pertenecer a la misma compañía."
+
+#. module: product_category_company
+#. odoo-python
+#: code:addons/product_category_company/models/product_category.py:0
+msgid "A category and its children must belong to the same company."
+msgstr "Una categoría y sus categorías hijas deben pertenecer a la misma compañía."
