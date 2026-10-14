@@ -6,8 +6,8 @@
         <field name="inherit_id" ref="product.product_category_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='parent_id']" position="before">
-                <field name="company_id" groups="base.group_multi_company"
-                       options="{'no_create': True, 'no_open': True}"/>
+                <field name="domex_vinyasa" groups="base.group_system"/>
+                <field name="domex_vinyasa_restricted" groups="base.group_system" readonly="1"/>
             </xpath>
         </field>
     </record>
@@ -21,8 +21,8 @@
                 <attribute name="multi_edit">1</attribute>
             </xpath>
             <xpath expr="//field[@name='display_name']" position="after">
-                <field name="company_id" groups="base.group_multi_company" optional="show"
-                       options="{'no_create': True, 'no_open': True}"/>
+                <field name="domex_vinyasa" groups="base.group_system" optional="show"/>
+                <field name="domex_vinyasa_restricted" groups="base.group_system" optional="hide" readonly="1"/>
             </xpath>
         </field>
     </record>

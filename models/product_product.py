@@ -8,5 +8,5 @@ class ProductProduct(models.Model):
     def default_get(self, fields_list):
         values = super().default_get(fields_list)
         # Explicit defaults on delegated fields do not call the template's
-        # default_get(), so variants need the same company filter.
+        # default_get(), so variants need the same category access filter.
         return self.env["product.template"]._filter_category_default(values)

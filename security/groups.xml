@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="privilege_vinyasa" model="res.groups.privilege">
+        <field name="name">Domex: Categorías Vinyasa</field>
+        <field name="category_id" ref="base.module_category_master_data"/>
+    </record>
+    <record id="group_vinyasa" model="res.groups">
+        <field name="name">Vinyasa</field>
+        <field name="privilege_id" ref="privilege_vinyasa"/>
+        <field name="implied_ids" eval="[Command.link(ref('base.group_user'))]"/>
+        <field name="comment">Permite consultar las categorías Vinyasa y sus productos, además de las categorías compartidas. Se conservan las restricciones de almacenes y compañías de los productos. No concede acceso a compañías ni permisos de administración.</field>
+    </record>
+</odoo>
